@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    external: true

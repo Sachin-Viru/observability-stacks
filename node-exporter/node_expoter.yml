@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    restart: unless-stopped
+    networks:
+      - monitoring
+    ports:
+      - "9100:9100"
+    pid: host
+    privileged: true
+    command:
+      - "--web.listen-address=:9100"
+      - "--path.rootfs=/host"
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.systemd"
+      - "--collector.systemd.unit-whitelist=(apache2|nginx|jenkins|ssh|docker).service"
+    volumes:
+      - /:/host:ro,rslave
+      - /run/systemd:/run/systemd:ro
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+networks:
+  monitoring:
+    external: true
