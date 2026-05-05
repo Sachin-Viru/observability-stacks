@@ -1,0 +1,20 @@
+global:
+  resolve_timeout: 5m
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+route:
+  receiver: rocketchat
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+
+receivers:
+  - name: rocketchat
+    webhook_configs:
+      - url: "YOU'RE WEBHOOK FROM ROCKET-CHAT"
+        send_resolved: true
+        http_config: {}
+        max_alerts: 10
