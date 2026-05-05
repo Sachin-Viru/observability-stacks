@@ -233,7 +233,31 @@ observability-stack/
 
 ## 📸 Screenshots
 
-> Add your Grafana dashboard screenshots and Rocket.Chat alert screenshots here
+### Grafana — Node Exporter Full Dashboard
+Real-time CPU, memory, disk, and network metrics from the host machine via node_exporter.
+
+![Grafana Node Exporter Dashboard](docs/screenshots/grafana-node-exporter.png)
+
+---
+
+### Blackbox Exporter — HTTP Endpoint Monitoring
+Live probe results: GitHub and Google resolve UP, a dummy test domain correctly shows DOWN.
+
+![Blackbox HTTP Alerts](docs/screenshots/blackbox-alerts.png)
+
+---
+
+### Service Down Alerts — Rocket.Chat #alerts channel
+Alertmanager firing critical alerts: `UrlMiniDown`, `JenkinsDown`, `WebsiteDown`, `NodeDown` — all routing correctly to Rocket.Chat with instance and summary details.
+
+![Service Down Alerts](docs/screenshots/service-down-alerts.png)
+
+---
+
+### Service Resolved Alerts — Full FIRING → RESOLVED cycle
+`apache2.service` and `jenkins.service` stopped → FIRING alert sent. Services restarted → RESOLVED notification received automatically. Full end-to-end alerting pipeline confirmed working.
+
+![Service Resolved Alerts](docs/screenshots/service-resolved-alerts.png)
 
 ---
 
