@@ -494,4 +494,4 @@ If Rocket.Chat receives a formatted message → everything is wired correctly.
 ## 👤 Author
 
 **Sachin** — DevOps Engineer transitioning to SRE  
-Hands-on with: Docker · Prometheus · Grafana · Loki · Ansible · Jenkins · ArgoCD · Kubernetes ·
+Hands-on with: Docker · Prometheus · Grafana · Loki · Zabbix · Ansible · Jenkins · ArgoCD · Kubernetes ·
