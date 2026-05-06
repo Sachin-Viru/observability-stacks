@@ -234,7 +234,7 @@ docker network create monitoring
 
 ### 2. Clone and configure
 ```bash
-git clone https://github.com/Sachin-Viru/observability-stack.git
+git clone https://github.com/Sachin-Viru/observability-stacks.git
 cd observability-stack
 ```
 
