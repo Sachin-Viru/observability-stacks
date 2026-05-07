@@ -14,7 +14,7 @@ route:
 receivers:
   - name: rocketchat
     webhook_configs:
-      - url: "YOU'RE WEBHOOK FROM ROCKET-CHAT"
+      - url: "http://rocketchat:3000/hooks/<WEBHOOK_ID>/<TOKEN>"
         send_resolved: true
         http_config: {}
         max_alerts: 10
