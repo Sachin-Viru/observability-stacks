@@ -496,6 +496,12 @@ If Rocket.Chat receives a formatted message → everything is wired correctly.
 - Use actual IPs or container names for internal targets; use full domain names for external URLs
 - `http://localhost:9115/probe?target=https://google.com&module=http_2xx` lets you test a probe manually
 
+**Loki + Promtail — Centralized Log Aggregation**
+- Promtail collects logs from `/var/log` and Docker container log paths and forwards them to Loki for centralized storage
+- Loki stores logs as labeled streams, enabling fast filtering using labels like `job`, `host`, and `container`
+- Grafana uses Loki datasource with LogQL queries to search, filter, and visualize logs in real time
+- Example query `{job="docker"} |= "error"` helps identify errors across all containers instantly
+
 ---
 
 ## 👤 Author
