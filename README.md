@@ -255,7 +255,7 @@ docker compose -f blackbox/blackbox-compose.yml up -d
 # Start log stack
 docker run -itd   --network=monitoring   --name promtail   --restart always   -p 9080:9080   -v /var/log:/var/log:ro   -v /var/lib/docker/containers:/var/lib/docker/containers:ro   -v $(pwd)/promtail.yml:/etc/promtail/promtail.yml   grafana/promtail:latest   -config.file=/etc/promtail/promtail.yml
 
-
+docker run -itd   --name loki   --restart always   -p 3100:3100   --network=monitoring   -v $(pwd)/loki-local-config.yaml:/etc/loki/loki-local-config.yaml   grafana/loki:latest   -config.file=/etc/loki/loki-local-config.yaml
 
 # Start Grafana
 docker compose -f grafana/grafana-compose.yml up -d
