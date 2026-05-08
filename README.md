@@ -268,6 +268,9 @@ docker compose -f grafana/grafana-compose.yml up -d
 | Grafana | http://localhost:3000 |
 | Alertmanager | http://localhost:9093 |
 | Blackbox Exporter | http://localhost:9115 |
+| Loki | http://localhost:3100 |
+| Promtail | http://localhost:9080 |
+| Node Exporter | http://localhost:9100 |
 
 ### 6. Verify targets are UP
 Open http://localhost:9090/targets — all jobs should show `UP`
