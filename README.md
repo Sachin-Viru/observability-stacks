@@ -253,8 +253,9 @@ docker compose -f alertmanager/alertmanager-container.yml up -d
 docker compose -f blackbox/blackbox-compose.yml up -d
 
 # Start log stack
-docker compose -f loki/loki-compose.yml up -d
-docker compose -f promtail/promtail-compose.yml up -d
+docker run -itd   --network=monitoring   --name promtail   --restart always   -p 9080:9080   -v /var/log:/var/log:ro   -v /var/lib/docker/containers:/var/lib/docker/containers:ro   -v $(pwd)/promtail.yml:/etc/promtail/promtail.yml   grafana/promtail:latest   -config.file=/etc/promtail/promtail.yml
+
+
 
 # Start Grafana
 docker compose -f grafana/grafana-compose.yml up -d
