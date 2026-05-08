@@ -346,6 +346,13 @@ Alertmanager firing critical alerts: `UrlMiniDown`, `JenkinsDown`, `WebsiteDown`
 
 ---
 
+### Loki Observability Stack — Real-Time Log Analytics
+Promtail forwarding system and container logs to Loki with centralized querying, filtering, and troubleshooting directly from Grafana.
+
+![Loki Observability](docs/screenshots/loki-logs.png)
+
+---
+
 ## 🔧 Rocket.Chat + Grafana Port Conflict Fix
 
 This is a real problem you will hit if you run both Grafana and Rocket.Chat on the same host.
