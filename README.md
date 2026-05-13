@@ -1,282 +1,130 @@
-# 🚀 Production Observability Stack
+# 🔭 Observability Stack
 
-A production-pattern monitoring and alerting stack built with **Prometheus, Grafana, Loki, Promtail, Alertmanager, Node Exporter, and Blackbox Exporter** — fully containerized with Docker and integrated with **Rocket.Chat** for real-time alerting.
+A production-pattern monitoring and alerting stack built with Prometheus, Grafana, Loki, and Alertmanager — fully containerized with Docker, alerting to Rocket.Chat in real time.
 
-![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge\&logo=prometheus\&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge\&logo=grafana\&logoColor=white)
-![Loki](https://img.shields.io/badge/Loki-F0A500?style=for-the-badge\&logo=grafana\&logoColor=white)
-![Promtail](https://img.shields.io/badge/Promtail-3F51B5?style=for-the-badge\&logo=grafana\&logoColor=white)
-![Alertmanager](https://img.shields.io/badge/Alertmanager-E6522C?style=for-the-badge\&logo=prometheus\&logoColor=white)
-![Node Exporter](https://img.shields.io/badge/Node%20Exporter-0A7EA4?style=for-the-badge\&logo=prometheus\&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge\&logo=docker\&logoColor=white)
-![RocketChat](https://img.shields.io/badge/Rocket.Chat-F5455C?style=for-the-badge\&logo=rocket.chat\&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![Loki](https://img.shields.io/badge/Loki-F0A500?style=for-the-badge&logo=grafana&logoColor=white)
+![Promtail](https://img.shields.io/badge/Promtail-3F51B5?style=for-the-badge&logo=grafana&logoColor=white)
+![Alertmanager](https://img.shields.io/badge/Alertmanager-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
+![Node Exporter](https://img.shields.io/badge/Node%20Exporter-0A7EA4?style=for-the-badge&logo=prometheus&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![RocketChat](https://img.shields.io/badge/Rocket.Chat-F5455C?style=for-the-badge&logo=rocket.chat&logoColor=white)
 
 ---
 
-# 📐 Architecture
+## 📐 Architecture
 
-```text
+```
 ┌─────────────────────────────────────────────────────────────────┐
-│                  Docker Network: monitoring                     │
+│                        Docker Network: monitoring               │
 │                                                                 │
-│  ┌──────────────┐     scrape     ┌─────────────────────────┐    │ 
-│  │ node_exporter│◄───────────────│                         │    │
-│  │   :9100      │                │      Prometheus         │    │
-│  ├──────────────┤                │        :9090            │    │
-│  │   Blackbox   │◄───────────────│                         │    │
-│  │   :9115      │                │  - metrics collection   │    │
-│  ├──────────────┤                │  - rule evaluation      │    │ 
-│  │   Jenkins    │◄───────────────│  - alert firing         │    │
-│  │   :8080      │                └────────────┬────────────┘    │
-│  └──────────────┘                             │ alert           │ 
-│                                               ▼                 │
-│  ┌──────────────┐                ┌─────────────────────────┐    │
-│  │    Promtail  │──── push ─────►│      Alertmanager       │    │
-│  │    :9080     │                │        :9093            │    │
-│  └──────┬───────┘                │  - routing              │    │
-│         │ push logs              │  - deduplication        │    │
-│         ▼                        │  - silencing            │    │
-│  ┌──────────────┐                └────────────┬────────────┘    │
-│  │     Loki     │                             │ webhook         │
-│  │    :3100     │                             ▼                 │
-│  └──────┬───────┘                ┌─────────────────────────┐    │
-│         │                        │      Rocket.Chat        │    │
-│         ▼                        │        :4000            │    │
-│  ┌──────────────┐                │  🔥 FIRING alerts       │    │ 
-│  │   Grafana    │◄───────────────│  ✅ RESOLVED alerts     │    │
-│  │    :3000     │  datasources   └─────────────────────────┘    │
+│  ┌──────────────┐     scrape     ┌─────────────────────────┐   │
+│  │ node_exporter│◄───────────────│                         │   │
+│  │   :9100      │                │      Prometheus         │   │
+│  ├──────────────┤                │        :9090            │   │
+│  │   Blackbox   │◄───────────────│                         │   │
+│  │   :9115      │                │  - metrics collection   │   │
+│  ├──────────────┤                │  - rule evaluation      │   │
+│  │   Jenkins    │◄───────────────│  - alert firing         │   │
+│  │   :8080      │                └────────────┬────────────┘   │
+│  └──────────────┘                             │ alert          │
+│                                               ▼                │
+│  ┌──────────────┐                ┌─────────────────────────┐   │
+│  │    Promtail  │──── push ─────►│      Alertmanager       │   │
+│  │    :9080     │                │        :9093            │   │
+│  └──────┬───────┘                │  - routing              │   │
+│         │ push logs              │  - deduplication        │   │
+│         ▼                        │  - silencing            │   │
+│  ┌──────────────┐                └────────────┬────────────┘   │
+│  │     Loki     │                             │ webhook        │
+│  │    :3100     │                             ▼                │
+│  └──────┬───────┘                ┌─────────────────────────┐   │
+│         │                        │      Rocket.Chat        │   │
+│         ▼                        │        :4000            │   │
+│  ┌──────────────┐                │  🔥 FIRING alerts       │   │
+│  │   Grafana    │◄───────────────│  ✅ RESOLVED alerts     │   │
+│  │    :3000     │  datasources   └─────────────────────────┘   │
 │  └──────────────┘                                               │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-# ✨ Features
+## 🧱 Stack Components
 
-* 📊 Infrastructure monitoring with Prometheus
-* 📈 Grafana dashboards for metrics and logs
-* 📜 Centralized log aggregation using Loki
-* 🚚 Log shipping with Promtail
-* 🌐 HTTP/HTTPS endpoint monitoring via Blackbox Exporter
-* 🚨 Real-time alerting with Alertmanager
-* 💬 Rocket.Chat webhook notifications
-* 🔍 Systemd service monitoring
-* 🔐 SSL certificate expiry monitoring
-* 🐳 Fully containerized with Docker Compose
-* 📡 Host monitoring with Node Exporter
-* ⚡ Real-time FIRING → RESOLVED alert lifecycle
+| Component | Role | Port |
+|---|---|---|
+| **Prometheus** | Metrics collection & alert rule evaluation | 9090 |
+| **Node Exporter** | Host metrics (CPU, RAM, Disk) + systemd services | 9100 |
+| **Blackbox Exporter** | HTTP/HTTPS endpoint probing | 9115 |
+| **Alertmanager** | Alert routing, deduplication, notifications | 9093 |
+| **Grafana** | Visualization (metrics + logs) | 3000 |
+| **Loki** | Log aggregation | 3100 |
+| **Promtail** | Log collection agent | 9080 |
+| **Rocket.Chat** | Alert notification receiver | 4000 |
 
 ---
 
-# 🧱 Stack Components
+## 📊 What Gets Monitored
 
-| Component         | Role                                       | Port |
-| ----------------- | ------------------------------------------ | ---- |
-| Prometheus        | Metrics collection & alert rule evaluation | 9090 |
-| Grafana           | Metrics & logs visualization               | 3000 |
-| Loki              | Log aggregation                            | 3100 |
-| Promtail          | Log collection agent                       | 9080 |
-| Alertmanager      | Alert routing & notifications              | 9093 |
-| Node Exporter     | Host metrics collection                    | 9100 |
-| Blackbox Exporter | HTTP/HTTPS probing                         | 9115 |
-| Rocket.Chat       | Alert notification receiver                | 4000 |
+### System Metrics (via Node Exporter)
+- CPU usage per core
+- Memory utilization
+- Disk space and I/O
+- Network throughput
+- System load average
 
----
+### Systemd Services (via Node Exporter systemd collector)
+- `apache2.service`
+- `nginx.service`
+- `jenkins.service`
+- `ssh.service`
+- `docker.service`
 
-# 🚀 Quick Start
+### HTTP Endpoints (via Blackbox Exporter)
+- External URLs — up/down status
+- Response time
+- SSL certificate expiry (alerts at <30 days)
 
-## 📋 Prerequisites
-
-* Docker
-* Docker Compose
-* Linux Host (Ubuntu 22.04 recommended)
-* Rocket.Chat instance
-
----
-
-## ⚙️ Recommended Host Resources
-
-* 2 CPU cores minimum
-* 4 GB RAM minimum
-* 10 GB free disk space
+### Logs (via Promtail → Loki)
+- System logs (`/var/log/syslog`)
+- Auth logs (`/var/log/auth.log`)
+- Application logs
 
 ---
 
-## 1️⃣ Create Docker Network
+## 🚨 Alert Rules
 
-```bash
-docker network create monitoring
+### System Alerts
+| Alert | Condition | Severity |
+|---|---|---|
+| `HighCPU` | CPU > 80% for 2m | warning |
+| `HighMemory` | Memory > 85% for 2m | warning |
+| `DiskSpaceLow` | Disk > 80% for 5m | warning |
+| `HighLoad` | Load avg > 5 for 2m | warning |
+
+### Service Alerts
+| Alert | Condition | Severity |
+|---|---|---|
+| `ServiceDown` | systemd service not active for 1m | critical |
+| `ServiceFailed` | systemd service in failed state | critical |
+
+### HTTP Alerts
+| Alert | Condition | Severity |
+|---|---|---|
+| `WebsiteDown` | probe_success == 0 for 1m | critical |
+| `WebsiteSlowResponse` | response > 3s for 2m | warning |
+| `SSLCertExpiringSoon` | cert expiry < 30 days | warning |
+| `JenkinsDown` | Jenkins unreachable for 1m | critical |
+
+---
+
+## 🔔 Alert Notifications (Rocket.Chat)
+
+Alerts fire to a Rocket.Chat channel via incoming webhook with a custom script:
+
 ```
-
----
-
-## 2️⃣ Clone Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/observability-stack.git
-cd observability-stack
-```
-
----
-
-## 3️⃣ Configure Rocket.Chat Webhook
-
-Edit:
-
-```bash
-alertmanager/alertmanager.yml
-```
-
-Replace webhook URL with your own Rocket.Chat webhook URL.
-
----
-
-## 4️⃣ Start the Stack
-
-```bash
-docker compose -f prometheus/prometheus-compose.yml up -d
-
-docker compose -f node-exporter/node-exporter.yml up -d
-
-docker compose -f alertmanager/alertmanager-container.yml up -d
-
-docker compose -f blackbox/blackbox-compose.yml up -d
-
-docker compose -f loki/loki-compose.yml up -d
-
-docker compose -f promtail/promtail-compose.yml up -d
-
-docker compose -f grafana/grafana-compose.yml up -d
-```
-
----
-
-## 5️⃣ Access the Services
-
-| Service           | URL                   |
-| ----------------- | --------------------- |
-| Prometheus        | http://localhost:9090 |
-| Grafana           | http://localhost:3000 |
-| Alertmanager      | http://localhost:9093 |
-| Loki              | http://localhost:3100 |
-| Promtail          | http://localhost:9080 |
-| Node Exporter     | http://localhost:9100 |
-| Blackbox Exporter | http://localhost:9115 |
-| Rocket.Chat       | http://localhost:4000 |
-
----
-
-## 6️⃣ Verify Targets
-
-Open:
-
-```text
-http://localhost:9090/targets
-```
-
-All targets should show:
-
-```text
-UP
-```
-
----
-
-# 🔑 Default Credentials
-
-| Service | Username | Password |
-| ------- | -------- | -------- |
-| Grafana | admin    | admin    |
-
-> Change default credentials immediately in production.
-
----
-
-# 📊 What Gets Monitored
-
-## System Metrics
-
-Collected using Node Exporter:
-
-* CPU usage
-* Memory utilization
-* Disk usage and I/O
-* Network throughput
-* System load average
-
----
-
-## Systemd Services
-
-Monitored services:
-
-* apache2.service
-* nginx.service
-* jenkins.service
-* ssh.service
-* docker.service
-
----
-
-## HTTP Endpoints
-
-Monitored using Blackbox Exporter:
-
-* Website uptime
-* Response latency
-* SSL certificate expiry
-
----
-
-## Logs
-
-Collected using Promtail → Loki:
-
-* `/var/log/syslog`
-* `/var/log/auth.log`
-* Docker container logs
-* Application logs
-
----
-
-# 🚨 Alert Rules
-
-## System Alerts
-
-| Alert        | Condition               | Severity |
-| ------------ | ----------------------- | -------- |
-| HighCPU      | CPU > 80% for 2m        | warning  |
-| HighMemory   | Memory > 85% for 2m     | warning  |
-| DiskSpaceLow | Disk > 80% for 5m       | warning  |
-| HighLoad     | Load average > 5 for 2m | warning  |
-
----
-
-## Service Alerts
-
-| Alert         | Condition                       | Severity |
-| ------------- | ------------------------------- | -------- |
-| ServiceDown   | systemd service inactive for 1m | critical |
-| ServiceFailed | systemd failed state detected   | critical |
-
----
-
-## HTTP Alerts
-
-| Alert               | Condition            | Severity |
-| ------------------- | -------------------- | -------- |
-| WebsiteDown         | probe_success == 0   | critical |
-| WebsiteSlowResponse | Response time > 3s   | warning  |
-| SSLCertExpiringSoon | SSL expiry < 30 days | warning  |
-| JenkinsDown         | Jenkins unreachable  | critical |
-
----
-
-# 🔔 Rocket.Chat Alert Notifications
-
-Example alert message:
-
-```text
 🔥 FIRING — ServiceDown
 • Severity: critical
 • Instance: node_exporter:9100
@@ -289,51 +137,37 @@ Example alert message:
 ```
 
 ---
+## 🔗 Creating Webhook for Alertmanager (Rocket.Chat)
 
-# 🔗 Rocket.Chat Webhook Integration
+### Step 1: Create Incoming Webhook
+* First Create User **prometheus-boat** 
+* Then Go to **Administration → Integrations**
+* Click **New Integration → Incoming WebHook**
 
-## Step 1 — Create Incoming Webhook
+Fill:
 
-Go to:
+* Enabled → ON
+* Name → `prometheus-alerts`
+* Post to Channel → `#alerts`
+* Username → `prometheus-boat`
+* Alias → `Prometheus Alertmanager`
+* Avatar URL →
 
-```text
-Administration → Integrations
-```
-
-Create:
-
-```text
-New Integration → Incoming WebHook
-```
-
-Configuration:
-
-| Setting         | Value                   |
-| --------------- | ----------------------- |
-| Enabled         | ON                      |
-| Name            | prometheus-alerts       |
-| Post to Channel | #alerts                 |
-| Username        | prometheus-boat         |
-| Alias           | Prometheus Alertmanager |
+  ```
+  https://prometheus.io/assets/favicons/android-chrome-192x192.png
+  ```
 
 ---
 
-## ⚠️ Important
+### ⚠️ Important
 
-Enable:
+Enable **Script Enabled → ON**
 
-```text
-Script Enabled → ON
-```
-
-Otherwise Rocket.Chat receives alerts without formatted content.
+Otherwise, Rocket.Chat will only show notification without message content.
 
 ---
 
-## Step 2 — Add Webhook Script
-
-<details>
-<summary>Rocket.Chat Webhook Script</summary>
+### Step 2: Add Script
 
 ```javascript
 class Script {
@@ -351,6 +185,7 @@ class Script {
       alerts.forEach(alert => {
         const status = (alert.status || "").toLowerCase();
 
+        // Map states clearly
         let stateText = "";
         let emoji = "";
 
@@ -386,159 +221,170 @@ class Script {
 }
 ```
 
-</details>
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker + Docker Compose
+- Linux host (Ubuntu 22.04 recommended)
+- Rocket.Chat instance (or swap for Slack — see below)
+
+### 1. Create Docker network
+```bash
+docker network create monitoring
+```
+
+### 2. Clone and configure
+```bash
+git clone https://github.com/Sachin-Viru/observability-stacks.git
+cd observability-stack
+```
+
+### 3. Set your Rocket.Chat webhook URL
+```bash
+# edit alertmanager/alertmanager.yml
+# replace the webhook url with your own
+```
+
+### 4. Start the stack
+```bash
+# Start core monitoring
+docker compose -f prometheus/prometheus-compose.yml up -d
+docker compose -f node-exporter/node-exporter.yml up -d
+docker compose -f alertmanager/alertmanager-container.yml up -d
+docker compose -f blackbox/blackbox-compose.yml up -d
+
+# Start log stack
+docker run -itd   --network=monitoring   --name promtail   --restart always   -p 9080:9080   -v /var/log:/var/log:ro   -v /var/lib/docker/containers:/var/lib/docker/containers:ro   -v $(pwd)/promtail.yml:/etc/promtail/promtail.yml   grafana/promtail:latest   -config.file=/etc/promtail/promtail.yml
+
+docker run -itd   --name loki   --restart always   -p 3100:3100   --network=monitoring   -v $(pwd)/loki-local-config.yaml:/etc/loki/loki-local-config.yaml   grafana/loki:latest   -config.file=/etc/loki/loki-local-config.yaml
+
+# Start Grafana
+docker compose -f grafana/grafana-compose.yml up -d
+```
+
+### 5. Access the UIs
+| Service | URL |
+|---|---|
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
+| Alertmanager | http://localhost:9093 |
+| Blackbox Exporter | http://localhost:9115 |
+| Loki | http://localhost:3100 |
+| Promtail | http://localhost:9080 |
+| Node Exporter | http://localhost:9100 |
+
+### 6. Verify targets are UP
+Open http://localhost:9090/targets — all jobs should show `UP`
 
 ---
 
-# 📥 Recommended Grafana Dashboards
+## 🔧 Swap Rocket.Chat for Slack
 
-| Dashboard           | ID    |
-| ------------------- | ----- |
-| Node Exporter Full  | 1860  |
-| Blackbox Exporter   | 7587  |
-| Loki Logs Dashboard | 13639 |
-
-Import dashboards from:
-
-```text
-Grafana → Dashboards → Import
+Edit `alertmanager/alertmanager.yml`:
+```yaml
+receivers:
+  - name: slack
+    slack_configs:
+      - api_url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+        channel: "#alerts"
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
 ```
 
 ---
 
-# 📁 Repository Structure
+## 📁 Repository Structure
 
-```text
+```
 observability-stack/
 ├── prometheus/
-│   ├── prometheus.yml
-│   ├── alert.rules.yml
-│   └── prometheus-compose.yml
-│
+│   ├── prometheus.yml          # scrape configs + alertmanager endpoint
+│   └── alert.rules.yml         # all alert rules
 ├── alertmanager/
-│   ├── alertmanager.yml
-│   └── alertmanager-container.yml
-│
-├── grafana/
-│   └── grafana-compose.yml
-│
-├── loki/
-│   ├── loki-local-config.yaml
-│   └── loki-compose.yml
-│
-├── promtail/
-│   ├── promtail.yml
-│   └── promtail-compose.yml
-│
+│   ├── alertmanager-container.yml
+│   └── alertmanager.yml        # routing + receiver config
 ├── node-exporter/
-│   └── node-exporter.yml
-│
+│   └── node-exporter.yml       # with systemd collector enabled
 ├── blackbox/
 │   └── blackbox-compose.yml
-│
+├── loki/
+│   └── loki-compose.yml
+├── promtail/
+│   └── promtail-compose.yml
+├── grafana/
+│   └── grafana-compose.yml
 ├── rocketchat/
-│   └── webhook-script.js
-│
+│   └── webhook-script.js       # incoming webhook formatter script
 └── docs/
-    └── screenshots/
+    └── screenshots/            # dashboard and alert screenshots
 ```
 
 ---
 
-# 📸 Screenshots
+## 📸 Screenshots
 
-## Grafana — Node Exporter Dashboard
+### Grafana — Node Exporter Full Dashboard
+Real-time CPU, memory, disk, and network metrics from the host machine via node_exporter.
 
-Real-time CPU, memory, disk, and network metrics.
-
-```text
-docs/screenshots/grafana-node-exporter.png
-```
+![Grafana Node Exporter Dashboard](docs/screenshots/grafana-node-exporter.png)
 
 ---
 
-## Blackbox Exporter — HTTP Monitoring
+### Blackbox Exporter — HTTP Endpoint Monitoring
+Live probe results: GitHub and Google resolve UP, a dummy test domain correctly shows DOWN.
 
-Live HTTP probe status and uptime monitoring.
-
-```text
-docs/screenshots/blackbox-alerts.png
-```
+![Blackbox HTTP Alerts](docs/screenshots/blackbox-alerts.png)
 
 ---
 
-## Rocket.Chat — FIRING Alerts
+### Service Down Alerts — Rocket.Chat #alerts channel
+Alertmanager firing critical alerts: `UrlMiniDown`, `JenkinsDown`, `WebsiteDown`, `NodeDown` — all routing correctly to Rocket.Chat with instance and summary details.
 
-Critical alerts routed from Alertmanager.
-
-```text
-docs/screenshots/service-down-alerts.png
-```
+![Service Down Alerts](docs/screenshots/service-down-alerts.png)
 
 ---
 
-## Rocket.Chat — RESOLVED Alerts
+### Service Resolved Alerts — Full FIRING → RESOLVED cycle
+`apache2.service` and `jenkins.service` stopped → FIRING alert sent. Services restarted → RESOLVED notification received automatically. Full end-to-end alerting pipeline confirmed working.
 
-Automatic recovery notifications.
-
-```text
-docs/screenshots/service-resolved-alerts.png
-```
+![Service Resolved Alerts](docs/screenshots/service-resolved-alerts.png)
 
 ---
 
-## Loki + Grafana Logs
+### Loki Observability Stack — Real-Time Log Analytics
+Promtail forwarding system and container logs to Loki with centralized querying, filtering, and troubleshooting directly from Grafana.
 
-Centralized real-time log analytics.
-
-```text
-docs/screenshots/loki-logs.png
-```
+![Loki Observability](docs/screenshots/loki-logs.png)
 
 ---
 
-# 🔧 Real-World Troubleshooting
+## 🔧 Rocket.Chat + Grafana Port Conflict Fix
 
-## Rocket.Chat + Grafana Port Conflict
+This is a real problem you will hit if you run both Grafana and Rocket.Chat on the same host.
 
-### Problem
+### The problem
 
-Both services default to:
+Both Grafana and Rocket.Chat default to port `3000`. Running both means one of them must move. Rocket.Chat was remapped to `4000:3000` (host:container).
 
-```text
-Port 3000
+```
+Host port 3000 → Grafana
+Host port 4000 → Rocket.Chat (remapped)
 ```
 
-Solution:
+### The trap — Alertmanager webhook URL
 
-```text
-Grafana     → 3000
-Rocket.Chat → 4000
+This is where most people get confused. Even though Rocket.Chat is accessible at `http://localhost:4000` from your browser, the **Alertmanager container talks to Rocket.Chat container-to-container inside the Docker network** — where Rocket.Chat still listens on its internal port `3000`.
+
+```
+❌ WRONG  → url: "http://rocketchat:4000/hooks/..."   # host port, not visible inside Docker
+✅ CORRECT → url: "http://rocketchat:3000/hooks/..."  # internal container port
 ```
 
----
+The rule: **host port mapping (`4000:3000`) only applies outside Docker. Inside the Docker network, containers always talk on the container's internal port.**
 
-## Important Docker Networking Rule
-
-Inside Docker networks:
-
-```text
-Containers communicate using INTERNAL container ports
-```
-
-Example:
-
-```yaml
-❌ WRONG
-url: "http://rocketchat:4000/hooks/..."
-
-✅ CORRECT
-url: "http://rocketchat:3000/hooks/..."
-```
-
----
-
-## Correct Alertmanager Config
+### Fix 1 — Alertmanager config uses internal port 3000
 
 ```yaml
 receivers:
@@ -548,136 +394,124 @@ receivers:
         send_resolved: true
 ```
 
----
+### Fix 2 — Rocket.Chat ROOT_URL must use the host port 4000
 
-## Rocket.Chat ROOT_URL Fix
+Without this, Rocket.Chat generates broken links (file uploads, image previews, redirect URLs) pointing to `http://localhost:3000` — which is actually Grafana.
 
 ```yaml
+# in your Rocket.Chat docker compose
 environment:
   - ROOT_URL=http://localhost:4000
 ```
 
-Without this:
+Also set it in the admin panel: **Administration → General → Site URL → `http://localhost:4000`**
 
-* broken image previews
-* invalid redirects
-* wrong generated URLs
+### Fix 3 — Rocket.Chat webhook script must return correct format
 
----
+The raw Alertmanager payload arrives at Rocket.Chat but shows as an empty message unless the incoming webhook has a script enabled. The return format must be `{ content: { text: "..." } }` not just `{ text: "..." }`.
 
-# 🧠 Key Learnings
+```javascript
+class Script {
+  process_incoming_request({ request }) {
+    // parse alerts from request.content.alerts
+    // return { content: { text: formattedMessage } }
+  }
+}
+```
 
-## Docker Networking
+See `rocketchat/webhook-script.js` for the full working script.
 
-* Containers communicate using container names
-* Port mapping only applies outside Docker
-* Internal Docker communication uses container ports
-
----
-
-## Prometheus + Alertmanager
-
-* Prometheus evaluates rules
-* Alertmanager handles routing and deduplication
-* Incorrect YAML indentation silently breaks discovery
-
----
-
-## Node Exporter systemd Collector
-
-Required mounts:
+### Rocket.Chat Docker Compose (working config)
 
 ```yaml
-/run/systemd:/run/systemd:ro
-/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+version: '3.8'
+services:
+  rocketchat:
+    image: registry.rocket.chat/rocketchat/rocket.chat
+    container_name: rocketchat
+    restart: unless-stopped
+    ports:
+      - "4000:3000"              # host 4000 → container 3000
+    environment:
+      - ROOT_URL=http://localhost:4000   # CRITICAL — must match host port
+      - MONGO_URL=mongodb://mongo:27017/rocketchat
+      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
+      - DEPLOY_METHOD=docker
+    depends_on:
+      - mongo
+    networks:
+      - monitoring
+
+  mongo:
+    image: mongo:7.0
+    container_name: mongorocket
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - monitoring
+
+volumes:
+  mongo-data:
+
+networks:
+  monitoring:
+    external: true
 ```
 
-Also required:
+### Test the full pipeline manually
 
-```yaml
-privileged: true
-pid: host
+```bash
+curl -X POST http://localhost:9093/api/v2/alerts \
+  -H "Content-Type: application/json" \
+  -d '[{
+    "labels": {"alertname": "TestAlert", "severity": "warning", "instance": "localhost"},
+    "annotations": {"summary": "Test alert — pipeline working"}
+  }]'
 ```
 
----
-
-## Blackbox Exporter
-
-Important rule:
-
-```text
-localhost inside container ≠ host machine
-```
-
-Use:
-
-* container names
-* actual IP addresses
-* real domain names
+If Rocket.Chat receives a formatted message → everything is wired correctly.
 
 ---
 
-## Loki + Promtail
+## 🧠 Key Learnings
 
-* Promtail ships logs to Loki
-* Loki stores logs as labeled streams
-* Grafana queries logs using LogQL
+**Docker networking**
+- Containers on the same Docker network resolve each other by container name, not by host port
+- Port mapping (`4000:3000`) only affects access from outside Docker — inside the network, always use the container's internal port
+- `docker network inspect monitoring` shows all containers on the network and their internal IPs
 
-Example query:
+**Prometheus & Alertmanager**
+- Prometheus evaluates alert rules; Alertmanager handles routing — they are separate concerns
+- YAML indentation in `prometheus.yml` under `alertmanagers:` must be exact — wrong indentation silently breaks alertmanager discovery
+- `http://localhost:9090/status` shows whether Prometheus has discovered the Alertmanager endpoint
+- `http://localhost:9090/rules` shows rule load status; `http://localhost:9090/alerts` shows firing state
 
-```logql
-{job="docker"} |= "error"
-```
+**Node Exporter systemd collector**
+- `node_scrape_collector_success{collector="systemd"} 0` means the collector loaded but failed — almost always a missing dbus socket mount
+- Required mounts: `/run/systemd:/run/systemd:ro` AND `/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro`
+- Also requires `privileged: true` and `pid: host` in the compose file
 
----
+**Rocket.Chat webhook**
+- Raw Alertmanager JSON payload arrives but shows as empty message if the webhook script is missing or has wrong return format
+- Script must be wrapped in `class Script { process_incoming_request({request}) {} }` — bare functions don't work
+- Return format must be `{ content: { text: "..." } }` not `{ text: "..." }`
+- `send_resolved: true` in Alertmanager config enables the ✅ RESOLVED notification when a service recovers
 
-# 🚀 Future Improvements
+**Blackbox Exporter**
+- Probes run from inside the Docker network — `localhost` in a probe target means the blackbox container itself, not your host
+- Use actual IPs or container names for internal targets; use full domain names for external URLs
+- `http://localhost:9115/probe?target=https://google.com&module=http_2xx` lets you test a probe manually
 
-* Kubernetes deployment using Helm
-* Grafana provisioning as code
-* Persistent storage volumes
-* Multi-node monitoring
-* TLS/HTTPS support
-* Authentication hardening
-* CI/CD pipeline integration
-* Alert silencing examples
-* Infrastructure as Code with Terraform
-* GitHub Actions automation
-
----
-
-# 👤 Author
-
-## Sachin
-
-DevOps Engineer transitioning into SRE
-
-### Skills
-
-* Linux
-* Docker
-* Prometheus
-* Grafana
-* Loki
-* Alertmanager
-* Jenkins
-* Ansible
-* Terraform
-* Kubernetes
-* ArgoCD
-* GitHub Actions
-* Shell Scripting
+**Loki + Promtail — Centralized Log Aggregation**
+- Promtail collects logs from `/var/log` and Docker container log paths and forwards them to Loki for centralized storage
+- Loki stores logs as labeled streams, enabling fast filtering using labels like `job`, `host`, and `container`
+- Grafana uses Loki datasource with LogQL queries to search, filter, and visualize logs in real time
+- Example query `{job="docker"} |= "error"` helps identify errors across all containers instantly
 
 ---
 
-# ⭐ Support
+## 👤 Author
 
-If you found this project useful:
-
-* Star the repository
-* Fork the project
-* Share feedback
-* Open issues or improvements
-
----
-
+**Sachin** — DevOps Engineer transitioning to SRE  
+Hands-on with: Linux · Docker · Prometheus · Grafana · Loki · Zabbix · Ansible · Jenkins · Git-Hub Actions · ArgoCD · Kubernetes · Shell-Scripting · Terraform
